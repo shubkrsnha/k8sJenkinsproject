@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "<your-dockerhub-username>/flask-app"
-        KUBECONFIG = credentials('kube-config')   // if using kubeconfig secret
+        DOCKER_IMAGE = "rolex2k/flask-app"
+        //KUBECONFIG = credentials('kube-config')   // if using kubeconfig secret
     }
 
     stages {
