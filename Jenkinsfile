@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "rolex2k/flask-app"
-        DOCKER_CREDENTIALS = "Rolex@2025"
+        DOCKER_CREDENTIALS = "dockerhub-creds"   // ✅ Use the credentials ID here
         GIT_REPO = "https://github.com/shubkrsnha/k8sJenkinsproject.git"
-        GIT_BRANCH = "main"   // <-- Change to "master" if your repo branch is master
+        GIT_BRANCH = "main"
     }
 
     stages {
@@ -13,8 +13,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Clean workspace to avoid old metadata issues
-                    deleteDir()
+                    deleteDir() // Clean workspace
                     echo "🔄 Checking out branch: ${GIT_BRANCH}"
                     checkout([
                         $class: 'GitSCM',
@@ -29,7 +28,7 @@ pipeline {
             steps {
                 script {
                     echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ./app"
+                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
                 }
             }
         }
@@ -38,7 +37,7 @@ pipeline {
             steps {
                 script {
                     echo "📤 Pushing Docker image to Docker Hub"
-                    withDockerRegistry([credentialsId: "${DOCKER_CREDENTIALS}", url: "https://index.docker.io/v1/"]) {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
                         sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
                     }
                 }
@@ -61,7 +60,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    echo "🧹 Cleaning up unused Docker image"
+                    echo "🧹 Cleaning up unused Docker images"
                     sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
                 }
             }
