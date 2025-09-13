@@ -25,20 +25,13 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "🐳 Checking workspace files"
-                    sh "pwd && ls -R"
-
-                    // Dynamically detect where Dockerfile is
-                    def dockerfilePath = fileExists("Dockerfile") ? "Dockerfile" : "flask-app/Dockerfile"
-                    def contextPath = dockerfilePath == "Dockerfile" ? "." : "flask-app"
-
-                    echo "🐳 Building Docker image using ${dockerfilePath} with context ${contextPath}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f ${dockerfilePath} ${contextPath}"
-                }
-            }
+    steps {
+        script {
+            echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+            sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f app/Dockerfile app/"
         }
+    }
+}
 
         stage('Push Docker Image') {
             steps {
