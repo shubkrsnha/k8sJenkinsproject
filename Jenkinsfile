@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "rolex2k/flask-app"
-        DOCKER_CREDENTIALS = "dockerhub-creds"   // ✅ Use the credentials ID here
+        DOCKER_CREDENTIALS = "dockerhub-creds"
         GIT_REPO = "https://github.com/shubkrsnha/k8sJenkinsproject.git"
         GIT_BRANCH = "main"
     }
@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    deleteDir() // Clean workspace
+                    deleteDir()
                     echo "🔄 Checking out branch: ${GIT_BRANCH}"
                     checkout([
                         $class: 'GitSCM',
@@ -25,14 +25,20 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-    steps {
-        script {
-            echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-            sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f flask-app/Dockerfile ."
-        }
-    }
-}
+            steps {
+                script {
+                    echo "🐳 Checking workspace files"
+                    sh "pwd && ls -R"
 
+                    // Dynamically detect where Dockerfile is
+                    def dockerfilePath = fileExists("Dockerfile") ? "Dockerfile" : "flask-app/Dockerfile"
+                    def contextPath = dockerfilePath == "Dockerfile" ? "." : "flask-app"
+
+                    echo "🐳 Building Docker image using ${dockerfilePath} with context ${contextPath}"
+                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f ${dockerfilePath} ${contextPath}"
+                }
+            }
+        }
 
         stage('Push Docker Image') {
             steps {
