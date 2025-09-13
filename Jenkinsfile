@@ -25,13 +25,14 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
-                }
-            }
+    steps {
+        script {
+            echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+            sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f flask-app/Dockerfile ."
         }
+    }
+}
+
 
         stage('Push Docker Image') {
             steps {
