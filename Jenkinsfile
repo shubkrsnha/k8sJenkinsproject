@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "rolex2k/flask-app"
-        //DOCKER_CREDENTIALS = "dockerhub-creds"   // ✅ Use the credentials ID here
+        DOCKER_CREDENTIALS = "dockerhub-creds"   // ✅ Use the credentials ID here
         GIT_REPO = "https://github.com/shubkrsnha/k8sJenkinsproject.git"
         GIT_BRANCH = "main"
     }
