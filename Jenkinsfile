@@ -25,13 +25,13 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-    steps {
-        script {
-            echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-            sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f app/Dockerfile app/"
+            steps {
+                script {
+                    echo "🐳 Building Docker image: ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -f app/Dockerfile app/"
+                }
+            }
         }
-    }
-}
 
         stage('Push Docker Image') {
             steps {
@@ -50,7 +50,7 @@ pipeline {
                     echo "🚀 Deploying to Kubernetes"
                     sh """
                         kubectl set image deployment/flask-app \
-                        flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER} --record
+                        flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER}
                         kubectl rollout status deployment/flask-app
                     """
                 }
