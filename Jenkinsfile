@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "rolex2k/flask-app"
+        DOCKER_IMAGE     = "rolex2k/flask-app"
         DOCKER_CREDENTIALS = "dockerhub-creds"
-        GIT_REPO = "https://github.com/shubkrsnha/k8sJenkinsproject.git"
-        GIT_BRANCH = "main"
+        GIT_REPO         = "https://github.com/shubkrsnha/k8sJenkinsproject.git"
+        GIT_BRANCH       = "main"
     }
 
     stages {
@@ -38,7 +38,7 @@ pipeline {
                 script {
                     echo "📤 Pushing Docker image to Docker Hub"
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
-                        sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                        docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").push()
                     }
                 }
             }
@@ -48,11 +48,14 @@ pipeline {
             steps {
                 script {
                     echo "🚀 Deploying to Kubernetes"
-                    sh """
-                        kubectl set image deployment/flask-app \
-                        flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        kubectl rollout status deployment/flask-app
-                    """
+                    withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_CONTENT')]) {
+                        sh """
+                            echo "\$KUBECONFIG_CONTENT" > kubeconfig.yaml
+                            export KUBECONFIG=kubeconfig.yaml
+                            kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            kubectl rollout status deployment/flask-app
+                        """
+                    }
                 }
             }
         }
